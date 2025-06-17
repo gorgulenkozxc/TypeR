@@ -162,8 +162,8 @@ function _getSelectionSubpathsBounds() {
     d.putInteger(charIDToTypeID("Ttl "), 1); // tolérance
     executeAction(idMk, d, DialogModes.NO);
 
-    /* 2 ▸ analyser le Work Path */
-    var wp = activeDocument.pathItems.getByName("Work Path");
+    /* 2 ▸ analyser le Work Path (dernier tracé créé) */
+    var wp = activeDocument.pathItems[activeDocument.pathItems.length - 1];
     for (var s = 0; s < wp.subPathItems.length; s++) {
       var sp   = wp.subPathItems[s];
       var xmin =  1e9, ymin =  1e9,

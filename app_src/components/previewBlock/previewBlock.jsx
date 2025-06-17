@@ -6,7 +6,7 @@ import { FiArrowRightCircle, FiPlusCircle, FiMinusCircle, FiArrowUp, FiArrowDown
 import { AiOutlineBorderInner } from "react-icons/ai";
 import { MdCenterFocusWeak } from "react-icons/md";
 
-import { locale, setActiveLayerText, createTextLayerInSelection, alignTextLayerToSelection, changeActiveLayerTextSize, getStyleObject, scrollToLine } from "../../utils";
+import { locale, setActiveLayerText, createTextLayersInSelections, alignTextLayerToSelection, changeActiveLayerTextSize, getStyleObject, scrollToLine } from "../../utils";
 import { useContext } from "../../context";
 
 const PreviewBlock = React.memo(function PreviewBlock() {
@@ -17,21 +17,31 @@ const PreviewBlock = React.memo(function PreviewBlock() {
   const styleObject = getStyleObject(textStyle);
 
   const createLayer = () => {
+    /* 1 ▸ prépare le style (prise en compte du textScale) */
     let lineStyle = context.state.currentStyle;
     if (lineStyle && context.state.textScale) {
       lineStyle = _.cloneDeep(lineStyle);
-      const txtStyle = lineStyle.textProps?.layerText.textStyleRange?.[0]?.textStyle || {};
-      if (typeof txtStyle.size === "number") {
-        txtStyle.size *= context.state.textScale / 100;
-      }
-      if (typeof txtStyle.leading === "number" && txtStyle.leading) {
-        txtStyle.leading *= context.state.textScale / 100;
-      }
+      const txtStyle = lineStyle.textProps?.layerText.textStyleRange[0].textStyle || {};
+      if (typeof txtStyle.size === "number") txtStyle.size *= context.state.textScale / 100;
+      if (typeof txtStyle.leading === "number") txtStyle.leading *= context.state.textScale / 100;
     }
-    const pointText = context.state.pastePointText;
-    createTextLayerInSelection(line.text, lineStyle, pointText, (ok) => {
-      if (ok) context.dispatch({ type: "nextLine", add: true });
-    });
+
+    /* 2 ▸ assemble le buffer de lignes à coller (de la ligne courante à la fin) */
+    const startIndex = context.state.currentLine.rawIndex ?? 0;
+    const linesBuf = context.state.lines.slice(startIndex).map((l) => l.text);
+
+    /* 3 ▸ appelle la nouvelle API */
+    createTextLayersInSelections(
+      linesBuf,
+      lineStyle,
+      context.state.pastePointText,
+      (ok) => {
+        if (ok) {
+          /* avance le curseur d’autant de lignes qu’on vient de poser */
+          context.dispatch({ type: "nextLine", add: true, count: linesBuf.length });
+        }
+      }
+    );
   };
 
   const insertStyledText = () => {

@@ -164,6 +164,21 @@ const createTextLayerInSelection = (text, style, pointText, callback = () => {})
   });
 };
 
+/**
+ * Pose autant de calques texte qu’il y a de sous-sélections.
+ * @param {string[]} lines — les lignes à insérer
+ * @param {Object}   lineStyle — style (peut être null)
+ * @param {boolean}  pointText — true ⇒ point-text, false ⇒ box-text
+ * @param {Function} cb — callback(ok)
+ */
+const createTextLayersInSelections = (lines, lineStyle, pointText, cb) => {
+  const payload = { lines, style: lineStyle };
+  csInterface.evalScript(
+    `createTextLayersInSelections(${JSON.stringify(payload)}, ${!!pointText})`,
+    (res) => cb && cb(res === "")
+  );
+};
+
 const alignTextLayerToSelection = () => {
   csInterface.evalScript("alignTextLayerToSelection()", (error) => {
     if (error === "smallSelection") nativeAlert(locale.errorSmallSelection, locale.errorTitle, true);
@@ -306,4 +321,4 @@ const openFile = (path, autoClose = false) => {
   );
 };
 
-export { csInterface, locale, openUrl, readStorage, writeToStorage, nativeAlert, nativeConfirm, getUserFonts, getActiveLayerText, setActiveLayerText, createTextLayerInSelection, alignTextLayerToSelection, changeActiveLayerTextSize, getHotkeyPressed, resizeTextArea, scrollToLine, scrollToStyle, rgbToHex, getStyleObject, getDefaultStyle, getDefaultStroke, openFile, checkUpdate };
+export { csInterface, locale, openUrl, readStorage, writeToStorage, nativeAlert, nativeConfirm, getUserFonts, getActiveLayerText, setActiveLayerText, createTextLayerInSelection, createTextLayersInSelections, alignTextLayerToSelection, changeActiveLayerTextSize, getHotkeyPressed, resizeTextArea, scrollToLine, scrollToStyle, rgbToHex, getStyleObject, getDefaultStyle, getDefaultStroke, openFile, checkUpdate };

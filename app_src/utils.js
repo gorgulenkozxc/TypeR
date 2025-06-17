@@ -172,6 +172,13 @@ const createTextLayerInSelection = (text, style, pointText, callback = () => {})
  * @param {Function} cb — callback(ok)
  */
 const createTextLayersInSelections = (lines, lineStyle, pointText, cb) => {
+  if (!Array.isArray(lines) || !lines.length) {
+    cb && cb(false);
+    return;
+  }
+  if (!lineStyle) {
+    lineStyle = { textProps: getDefaultStyle(), stroke: getDefaultStroke() };
+  }
   const payload = { lines, style: lineStyle };
   csInterface.evalScript(
     `createTextLayersInSelections(${JSON.stringify(payload)}, ${!!pointText})`,

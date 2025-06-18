@@ -554,20 +554,21 @@ function _createTextLayersInSelections() {
 
     _createAndSetLayerText(data, w, h);
 
+    var b = _getCurrentTextLayerBounds();
+
     if (point) {
       _changeToPointText();
     } else {
       var tParams = jamText.getLayerText();
       var txtSize = tParams.layerText.textStyleRange[0].textStyle.size;
-      _setTextBoxSize(w, h + txtSize + 2);
+      _setTextBoxSize(w, b.height + txtSize + 2);
     }
 
     /* Centre le calque dans la zone */
-    var b = _getCurrentTextLayerBounds();
     _moveLayer(sel.xMid - b.xMid, sel.yMid - b.yMid);
   }
 
-  createTextLayersInSelectionsResult = "";
+  createTextLayersInSelectionsResult = String(n);
 }
 
 var alignTextLayerToSelectionResult;

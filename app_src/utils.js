@@ -173,7 +173,7 @@ const createTextLayerInSelection = (text, style, pointText, callback = () => {})
  */
 const createTextLayersInSelections = (lines, lineStyle, pointText, cb) => {
   if (!Array.isArray(lines) || !lines.length) {
-    cb && cb(false);
+    cb && cb(0);
     return;
   }
   if (!lineStyle) {
@@ -182,7 +182,20 @@ const createTextLayersInSelections = (lines, lineStyle, pointText, cb) => {
   const payload = { lines, style: lineStyle };
   csInterface.evalScript(
     `createTextLayersInSelections(${JSON.stringify(payload)}, ${!!pointText})`,
-    (res) => cb && cb(res === "")
+    (res) => {
+      if (res === "smallSelection") {
+        nativeAlert(locale.errorSmallSelection, locale.errorTitle, true);
+        cb && cb(0);
+        return;
+      }
+      if (res === "doc" || res === "noSelection") {
+        nativeAlert(locale.errorNoSelection, locale.errorTitle, true);
+        cb && cb(0);
+        return;
+      }
+      const count = parseInt(res, 10);
+      cb && cb(isNaN(count) ? 0 : count);
+    }
   );
 };
 

@@ -28,17 +28,21 @@ const PreviewBlock = React.memo(function PreviewBlock() {
 
     /* 2 ▸ assemble le buffer de lignes à coller (de la ligne courante à la fin) */
     const startIndex = context.state.currentLine.rawIndex ?? 0;
-    const linesBuf = context.state.lines.slice(startIndex).map((l) => l.text);
+    const linesBuf = [];
+    for (let i = startIndex; i < context.state.lines.length; i++) {
+      const l = context.state.lines[i];
+      if (!l.ignore) linesBuf.push(l.text);
+    }
 
     /* 3 ▸ appelle la nouvelle API */
     createTextLayersInSelections(
       linesBuf,
       lineStyle,
       context.state.pastePointText,
-      (ok) => {
-        if (ok) {
+      (count) => {
+        if (count > 0) {
           /* avance le curseur d’autant de lignes qu’on vient de poser */
-          context.dispatch({ type: "nextLine", add: true, count: linesBuf.length });
+          context.dispatch({ type: "nextLine", add: true, count });
         }
       }
     );

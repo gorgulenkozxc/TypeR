@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
+
 import config from './config'
 import {
 	checkUpdate,
@@ -12,74 +13,74 @@ import {
 
 const storage = readStorage()
 const storeFields = [
-	'notFirstTime',
-	'text',
-	'styles',
-	'folders',
-	'textScale',
-	'currentLineIndex',
-	'currentStyleId',
-	'pastePointText',
 	'ignoreLinePrefixes',
-	'defaultStyleId',
-	'autoClosePSD',
-	'checkUpdates',
+	'currentLineIndex',
 	'autoScrollStyle',
-	'images',
+	'pastePointText',
+	'defaultStyleId',
+	'currentStyleId',
+	'notFirstTime',
+	'checkUpdates',
+	'autoClosePSD',
+	'middleEast',
+	'textScale',
+	'direction',
 	'shortcut',
 	'language',
+	'folders',
+	'styles',
+	'images',
 	'theme',
-	'direction',
-	'middleEast',
+	'text',
 ]
 
 const defaultShortcut = {
-	add: ['WIN', 'CTRL'],
-	center: ['WIN', 'ALT'],
-	apply: ['WIN', 'SHIFT'],
-	next: ['CTRL', 'ENTER'],
-	previous: ['CTRL', 'TAB'],
-	increase: ['CTRL', 'SHIFT', 'PLUS'],
 	decrease: ['CTRL', 'SHIFT', 'MINUS'],
+	increase: ['CTRL', 'SHIFT', 'PLUS'],
+	previous: ['CTRL', 'TAB'],
 	insertText: ['WIN', 'V'],
+	next: ['CTRL', 'ENTER'],
+	apply: ['WIN', 'SHIFT'],
+	center: ['WIN', 'ALT'],
+	add: ['WIN', 'CTRL'],
 }
 
 const initialState = {
-	notFirstTime: false,
-	initiated: false,
-	text: '',
-	lines: [],
-	styles: [],
-	folders: [],
-	openFolders: [],
-	textScale: null,
-	currentLine: null,
-	currentLineIndex: 0,
-	currentStyle: null,
-	currentStyleId: null,
-	pastePointText: false,
-	ignoreLinePrefixes: ['##'],
-	defaultStyleId: null,
-	autoClosePSD: false,
-	checkUpdates: config.checkUpdates,
 	autoScrollStyle: storage.data?.autoScrollStyle !== false,
+	checkUpdates: config.checkUpdates,
+	ignoreLinePrefixes: ['##'],
+	pastePointText: false,
+	defaultStyleId: null,
+	currentStyleId: null,
+	notFirstTime: false,
+	currentLineIndex: 0,
+	autoClosePSD: false,
+	currentStyle: null,
+	middleEast: false,
+	currentLine: null,
+	theme: 'default',
+	language: 'auto',
+	initiated: false,
+	direction: 'ltr',
+	textScale: null,
+	openFolders: [],
 	modalType: null,
 	modalData: {},
+	folders: [],
+	styles: [],
 	images: [],
-	language: 'auto',
-	theme: 'default',
-	direction: 'ltr',
-	middleEast: false,
+	lines: [],
+	text: '',
 	...storage.data,
 	shortcut: { ...defaultShortcut, ...(storage.data?.shortcut || {}) },
 }
 
-const reducer = (state, action) => {
-	console.log('CONTEXT:', action)
-
+function reducer(state, action) {
 	let thenScroll = false
 	let thenSelectStyle = false
+
 	const newState = Object.assign({}, state)
+
 	switch (action.type) {
 		case 'removeFirstTime': {
 			newState.notFirstTime = true
@@ -89,12 +90,19 @@ const reducer = (state, action) => {
 
 		case 'import': {
 			for (const field in action.data) {
-				if (!action.data.hasOwnProperty(field)) continue
-				if (!initialState.hasOwnProperty(field)) continue
+				if (!Object.hasOwn(action.data, field)) {
+					continue
+				}
+
+				if (!Object.hasOwn(initialState, field)) {
+					continue
+				}
+
 				if (field === 'styles' && state.styles) {
 					const styles = []
 					let asked = false
 					let keep = false
+
 					for (const style of state.styles) {
 						const inImport = action.data.styles.find((s) => s.id === style.id)
 						if (
@@ -106,19 +114,25 @@ const reducer = (state, action) => {
 								keep = confirm(locale.settingsImportReplace)
 								asked = true
 							}
-							if (keep) styles.push(style)
-						}
-					}
-					for (const style of action.data.styles) {
-						if (!keep) {
-							styles.push(style)
-						} else {
-							const oldStyle = state.styles.find((s) => s.id === style.id)
-							if (!oldStyle?.edited || (style.edited && style.edited >= oldStyle.edited)) {
+
+							if (keep) {
 								styles.push(style)
 							}
 						}
 					}
+
+					for (const style of action.data.styles) {
+						if (!keep) {
+							styles.push(style)
+							continue
+						}
+
+						const oldStyle = state.styles.find((s) => s.id === style.id)
+						if (!oldStyle?.edited || (style.edited && style.edited >= oldStyle.edited)) {
+							styles.push(style)
+						}
+					}
+
 					newState[field] = styles
 				} else {
 					newState[field] = action.data[field]
@@ -139,14 +153,17 @@ const reducer = (state, action) => {
 		}
 
 		case 'prevLine': {
-			if (!state.text) break
-			let newIndex = state.currentLineIndex
-			for (let i = newIndex - 1; i >= 0; i--) {
+			if (!state.text) {
+				break
+			}
+
+			for (let i = state.currentLineIndex - 1; i >= 0; i--) {
 				if (!state.lines[i].ignore) {
 					newState.currentLineIndex = state.lines[i].rawIndex
 					break
 				}
 			}
+
 			thenScroll = true
 			thenSelectStyle = true
 			break
@@ -177,8 +194,7 @@ const reducer = (state, action) => {
 		case 'setTextScale': {
 			let scale = Number.parseInt(action.scale, 10) || null
 			if (scale) {
-				if (scale < 1) scale = 1
-				if (scale > 999) scale = 999
+				scale = Math.max(0, Math.min(scale, 999))
 			}
 			newState.textScale = scale
 			break
@@ -188,27 +204,38 @@ const reducer = (state, action) => {
 			const editId = action.id || action.data.id
 			if (action.data.styleIds) {
 				const styles = state.styles.concat([])
-				styles
-					.filter((s) => s.folder === editId)
-					.forEach((style) => {
-						if (!action.data.styleIds.includes(style.id)) {
-							style.folder = null
-						}
-					})
-				action.data.styleIds.forEach((sid) => {
-					const style = styles.find((s) => s.id === sid)
-					if (style) style.folder = editId
-				})
+				const { styleIds } = action.data
+
+				for (const style of styles) {
+					if (style.folder !== editId) {
+						continue
+					}
+
+					if (!styleIds.includes(style.id)) {
+						style.folder = null
+					}
+				}
+
+				for (const styleId of styleIds) {
+					const style = styles.find((style) => style.id === styleId)
+					if (style) {
+						style.folder = editId
+					}
+				}
+
 				newState.styles = styles
 				delete action.data.styleIds
 			}
+
 			const folders = state.folders.concat([])
 			const folder = folders.find((f) => f.id === editId)
+
 			if (folder) {
 				Object.assign(folder, action.data)
 			} else {
 				folders.push(action.data)
 			}
+
 			newState.folders = folders
 			break
 		}
@@ -220,14 +247,17 @@ const reducer = (state, action) => {
 		case 'duplicateFolder': {
 			const folderToDup = action.data
 			const newFolderId = Math.random().toString(36).substr(2, 8)
-			const newFolderName = folderToDup.name + ' copy'
+			const newFolderName = `${folderToDup.name} copy`
 			const newFolder = { id: newFolderId, name: newFolderName }
+
 			newState.folders = state.folders.concat(newFolder)
+
 			const stylesCopy = state.styles.filter((s) => s.folder === folderToDup.id)
 			const newStyles = stylesCopy.map((s) => {
 				const newStyleId = Math.random().toString(36).substr(2, 8)
 				return { ...s, id: newStyleId, folder: newFolderId }
 			})
+
 			newState.styles = state.styles.concat(newStyles)
 			newState.openFolders = state.openFolders.concat(newFolderId)
 			break
@@ -236,8 +266,13 @@ const reducer = (state, action) => {
 		case 'toggleFolder': {
 			let open = state.openFolders.concat([])
 			const id = action.id || 'unsorted'
-			if (open.includes(id)) open = open.filter((f) => f !== id)
-			else open.push(id)
+
+			if (open.includes(id)) {
+				open = open.filter((f) => f !== id)
+			} else {
+				open.push(id)
+			}
+
 			newState.openFolders = open
 			break
 		}
@@ -254,11 +289,17 @@ const reducer = (state, action) => {
 			} else if (!Array.isArray(action.data.prefixes)) {
 				action.data.prefixes = []
 			}
+
 			const styles = state.styles.concat([])
 			const editId = action.id || action.data.id
 			const style = styles.find((s) => s.id === editId)
-			if (style) Object.assign(style, action.data)
-			else styles.push(action.data)
+
+			if (style) {
+				Object.assign(style, action.data)
+			} else {
+				styles.push(action.data)
+			}
+
 			newState.styles = styles
 			break
 		}
@@ -272,7 +313,7 @@ const reducer = (state, action) => {
 			const styleToDup = action.data || state.styles.find((s) => s.id === state.currentStyleId)
 			if (styleToDup) {
 				const newStyleId = Math.random().toString(36).substr(2, 8)
-				const newStyle = { ...styleToDup, id: newStyleId, name: styleToDup.name + ' copy' }
+				const newStyle = { ...styleToDup, id: newStyleId, name: `${styleToDup.name} copy` }
 				newState.styles = state.styles.concat(newStyle)
 				newState.currentStyleId = newStyleId
 			}
@@ -353,7 +394,6 @@ const reducer = (state, action) => {
 		}
 
 		case 'updateShortcut': {
-			console.log(action)
 			newState.shortcut = action.shortcut
 			break
 		}
@@ -362,37 +402,49 @@ const reducer = (state, action) => {
 	for (const style of newState.styles) {
 		const folderId = style.folder || null
 		const hasFolder = newState.folders.find((f) => f.id === folderId)
-		if (!hasFolder) style.folder = null
+		if (!hasFolder) {
+			style.folder = null
+		}
 	}
 
 	if (newState.defaultStyleId) {
 		const hasDefault = newState.styles.find((s) => s.id === newState.defaultStyleId)
-		if (!hasDefault) newState.defaultStyleId = null
+		if (!hasDefault) {
+			newState.defaultStyleId = null
+		}
 	}
 
 	let sortedStyles = newState.styles.filter((s) => !s.folder)
+
 	for (const folder of newState.folders) {
 		const folderStyles = newState.styles.filter((s) => s.folder === folder.id)
 		sortedStyles = sortedStyles.concat(folderStyles)
 	}
+
 	newState.styles = sortedStyles
 
 	const stylePrefixes = []
 	const folderPrefixes = []
 	const currentFolder = state.currentStyle ? state.currentStyle.folder || null : null
+
 	for (const style of newState.styles) {
 		const folder = style.folder || null
+
 		for (const prefix of style.prefixes) {
 			const data = { prefix, style, folder }
 			stylePrefixes.push(data)
-			if (folder === currentFolder) folderPrefixes.push(data)
+
+			if (folder === currentFolder) {
+				folderPrefixes.push(data)
+			}
 		}
 	}
 
 	let linesCounter = 0
 	const rawLines = newState.text ? newState.text.split('\n') : []
-	const last = []
+	const lastIndexesList = []
 	let previousStyle = null
+
 	newState.lines = rawLines.map((rawText, rawIndex) => {
 		const ignorePrefix = newState.ignoreLinePrefixes.find((pr) => rawText.startsWith(pr)) || ''
 		const hasStylePrefix =
@@ -414,7 +466,7 @@ const reducer = (state, action) => {
 		const isPage = rawText.match(/Page [0-9]+/)
 		const ignore = !!ignorePrefix || !text || isPage
 		if (isPage && newState.images.length) {
-			last.push(linesCounter)
+			lastIndexesList.push(linesCounter)
 		}
 		const index = ignore ? 0 : ++linesCounter
 		const line = { rawText, rawIndex, ignorePrefix, stylePrefix, style, ignore, index, text }
@@ -423,14 +475,16 @@ const reducer = (state, action) => {
 		}
 		return line
 	})
-	last.forEach((index) => {
-		newState.lines.find((line) => line.index == index).last = true
-	})
+
+	for (const index of lastIndexesList) {
+		newState.lines.find((line) => line.index === index).last = true
+	}
 
 	newState.currentLine = newState.lines[newState.currentLineIndex] || null
+
 	if (!newState.currentLine || newState.currentLine.ignore) {
 		let newIndex = 0
-		for (let line of newState.lines) {
+		for (const line of newState.lines) {
 			if (!line.ignore) {
 				newIndex = line.rawIndex
 				break
@@ -439,6 +493,7 @@ const reducer = (state, action) => {
 		newState.currentLine = newState.lines[newIndex] || null
 		newState.currentLineIndex = newIndex
 	}
+
 	if (thenSelectStyle) {
 		if (newState.currentLine.style) {
 			newState.currentStyleId = newState.currentLine.style.id
@@ -463,20 +518,31 @@ const reducer = (state, action) => {
 	}
 	if (newState.currentStyle && newState.currentStyleId !== state.currentStyleId) {
 		const folder = newState.currentStyle.folder || 'unsorted'
-		if (!newState.openFolders.includes(folder)) newState.openFolders.push(folder)
-		if (newState.autoScrollStyle) scrollToStyle(newState.currentStyleId)
+
+		if (!newState.openFolders.includes(folder)) {
+			newState.openFolders.push(folder)
+		}
+
+		if (newState.autoScrollStyle) {
+			scrollToStyle(newState.currentStyleId)
+		}
 	}
+
 	if (thenScroll) {
 		scrollToLine(newState.currentLineIndex)
 	}
 
 	const dataToStore = {}
-	for (let field in newState) {
-		if (!newState.hasOwnProperty(field)) continue
+	for (const field in newState) {
+		if (!Object.hasOwn(newState, field)) {
+			continue
+		}
+
 		if (storeFields.includes(field)) {
 			dataToStore[field] = newState[field]
 		}
 	}
+
 	newState.initiated = true
 	writeToStorage(dataToStore)
 
@@ -498,6 +564,7 @@ const ContextProvider = React.memo(function ContextProvider(props) {
 			indexLink.remove()
 		}
 	}, [])
+
 	React.useEffect(() => {
 		if (state.checkUpdates) {
 			checkUpdate(config.appVersion).then((data) => {
@@ -507,15 +574,19 @@ const ContextProvider = React.memo(function ContextProvider(props) {
 			})
 		}
 	}, [state.checkUpdates])
+
 	React.useEffect(() => {
 		const link = document.getElementById('themeStyle')
-		if (!link) return
+		if (!link) {
+			return
+		}
 		if (state.theme && state.theme !== 'default') {
 			link.setAttribute('href', `./themes/${state.theme}.css`)
 		} else {
 			link.setAttribute('href', defaultStyleRef.current || './index.css')
 		}
 	}, [state.theme])
+
 	return <Context.Provider value={{ state, dispatch }}>{props.children}</Context.Provider>
 })
 ContextProvider.propTypes = {

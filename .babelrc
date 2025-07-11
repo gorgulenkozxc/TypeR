@@ -8,13 +8,7 @@
 			}
 		]
 	],
-	"plugins": [
-		"@babel/plugin-transform-class-properties",
-		"@babel/plugin-transform-optional-chaining",
-		"@babel/plugin-syntax-dynamic-import",
-		"@babel/plugin-transform-runtime",
-		"lodash"
-	],
+	"plugins": ["lodash"],
 	"env": {
 		"development": {},
 		"production": {

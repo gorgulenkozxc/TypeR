@@ -1,18 +1,18 @@
 @echo off
-chcp 65001 >nul
-setlocal EnableDelayedExpansion
+chcp 65001 >nul @rem Set the code page to UTF-8
+setlocal EnableDelayedExpansion 
 
-rem — Extraction de la version — 
+@rem get the current extension version
 for /f "tokens=5 delims=<>=/ " %%V in ('
     findstr /i "<Extension Id=\"typer\"" "CSXS\manifest.xml"
 ') do set "EXT_VERSION=%%~V"
 
-rem — Détection de la langue système —
+@rem get the current locale name
 for /f "tokens=3" %%a in (
     'reg query "HKCU\Control Panel\International" /v LocaleName 2^>nul'
 ) do set locale=%%a
 
-rem — Messages localisés utilisant !EXT_VERSION! —
+@rem setting localized messages based on locale name from the registry
 if "%locale:~0,2%"=="fr" (
     set msg_install="L'extension Photoshop TypeR v!EXT_VERSION! sera installée."
     set msg_close="Fermez Photoshop (s'il est ouvert)."

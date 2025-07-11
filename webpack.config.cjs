@@ -1,11 +1,12 @@
-import autoprefixer from 'autoprefixer'
-import postcssCssnano from 'cssnano'
-import HtmlWebpackPlugin from 'html-webpack-plugin'
-import LodashWebpackPlugin from 'lodash-webpack-plugin'
-import MiniCssExtractPlugin, { loader as _loader } from 'mini-css-extract-plugin'
-import postcssPresetEnv from 'postcss-preset-env'
-import { minify as _minify } from 'uglify-js'
-import MergeIntoSingleFilePlugin from 'webpack-merge-and-include-globally'
+const autoprefixer = require('autoprefixer')
+const postcssCssnano = require('cssnano')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const LodashWebpackPlugin = require('lodash-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const _loader = MiniCssExtractPlugin.loader
+const postcssPresetEnv = require('postcss-preset-env')
+const { minify: _minify } = require('uglify-js')
+const MergeIntoSingleFilePlugin = require('webpack-merge-and-include-globally')
 
 const hostFiles = [
 	'/app_src/lib/jam/jamHelpers.jsxinc',
@@ -199,4 +200,4 @@ function clientConfig(_, argv) {
 	return Object.assign({}, defaultConfig, envConfig)
 }
 
-export default [clientConfig]
+module.exports = [clientConfig]

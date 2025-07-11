@@ -8,7 +8,7 @@ import { ContextProvider } from './context'
 import HotkeysListner from './hotkeys'
 
 import './index.scss'
-import './lib/CSInterface'
+import './lib/CSInterface.js'
 import './lib/themeManager'
 
 const App = React.memo(function App() {

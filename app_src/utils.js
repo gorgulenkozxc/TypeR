@@ -1,4 +1,4 @@
-import './lib/CSInterface'
+import './lib/CSInterface.js'
 
 const csInterface = new window.CSInterface()
 const SYSTEM_PATH = csInterface.getSystemPath(window.SystemPath.EXTENSION)

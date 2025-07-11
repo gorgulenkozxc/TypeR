@@ -47,21 +47,21 @@ function Write-Success {
     Write-Host "[+] $message" -ForegroundColor Green
 }
 
-$dont_clear = $false
+$photoshop_path = $null
+$photoshop_process = Get-PhotoshopProcess
 # Wait for Photoshop to get closed if it's running
-if (Get-PhotoshopProcess) {
-    $process = (Get-PhotoshopProcess)
-    $dont_clear = $true
+if ($photoshop_process) {
+    $photoshop_path = $photoshop_process.Path
 
-    Clear-Host
+    # Clear-Host
     Write-Error "Photoshop is currently running. Please close it before proceeding."
-    Write-Info "Photoshop PID: $($process.Id). Process name: $($process.ProcessName)"
+    Write-Info "Photoshop PID: $($photoshop_process.Id). Process name: $($photoshop_process.ProcessName)"
 
     $user_input = Read-Host "Do you want to close Photoshop (Unsaved data probably will be discarded)? (y/N)"
 
     if ($user_input -eq "y" -or $user_input -eq "Y") {
         try {
-            $process | Stop-Process -Force
+            $photoshop_process | Stop-Process -Force
             Write-Success "Photoshop has been closed. Continuing installation..."
         }
         catch {
@@ -81,9 +81,11 @@ if (Get-PhotoshopProcess) {
 
 }
 
-if (-not $dont_clear) {
+# If photoshop wasn't running, we can clear the host
+if (-not $photoshop_path) {
     Clear-Host
 }
+
 Write-Warning "Installing Photoshop extension «TypeR v$EXT_VERSION»..."
 
 Write-Info "Enabling PlayerDebugMode for CSXS versions 6-12..."
@@ -141,3 +143,14 @@ Write-Info "Many thanks to Swirt for TyperTools and SeanR & Sakushi for this for
 Write-Info "ScanR's Discord if you need help: https://discord.com/invite/Pdmfmqk"
 Write-Host
 
+if ($photoshop_path) {
+    $run_photoshop = Read-Host "Do you want to run Photoshop now? (Y/n)"
+    if ($run_photoshop -eq "y" -or $run_photoshop -eq "Y" -or $run_photoshop -eq "") {
+        Write-Info "Starting Photoshop..."
+        Start-Process -FilePath $photoshop_path
+        Write-Success "Photoshop started successfully."
+    }
+    else {
+        Write-Info "You can run Photoshop later to see the changes."
+    }
+}

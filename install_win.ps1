@@ -1,3 +1,17 @@
+if ($args -contains "--help") {
+    Write-Host "Usage: install_win.ps1 [--mute] [--silent] [--help] [--yes]"
+    Write-Host "Options:"
+    Write-Host "  --mute: Suppress all messages"
+    Write-Host "  --silent: Suppress all messages except errors"
+    Write-Host "  --help: Show this help message"
+    Write-Host "  --yes: Automatically answer 'yes' to prompts"
+    exit
+}
+
+$is_mute = $args -contains "--mute"
+$is_silent = $args -contains "--silent" -or $is_mute
+$always_yes = $args -contains "--yes"
+
 $execution_start_time = Get-Date
 
 # Get the current extension version
@@ -23,6 +37,11 @@ function Write-Error {
     param (
         [string]$message
     )
+
+    if ($is_mute) {
+        return
+    }
+
     Write-Host "[-] $message" -ForegroundColor Red
 }
 
@@ -30,6 +49,11 @@ function Write-Warning {
     param (
         [string]$message
     )
+
+    if ($is_silent) {
+        return
+    }
+
     Write-Host "[!] $message" -ForegroundColor Yellow
 }
 
@@ -37,6 +61,11 @@ function Write-Info {
     param (
         [string]$message
     )
+
+    if ($is_silent) {
+        return
+    }
+
     Write-Host "[*] $message" -ForegroundColor DarkGray
 }
 
@@ -44,7 +73,31 @@ function Write-Success {
     param (
         [string]$message
     )
+
+    if ($is_silent) {
+        return
+    }
+
     Write-Host "[+] $message" -ForegroundColor Green
+}
+
+function Read-YesNo {
+    param (
+        [string]$message,
+        [switch]$defaultYes
+    )
+
+    if ($always_yes) {
+        return $true
+    }
+
+    $user_input = Read-Host "$message $(if ($defaultYes) { "(Y/n)" } else { "(y/N)" })"
+
+    if ($user_input -eq "") {
+        return $defaultYes
+    }
+
+    return $user_input -eq "y" -or $user_input -eq "Y"
 }
 
 $photoshop_path = $null
@@ -53,13 +106,12 @@ $photoshop_process = Get-PhotoshopProcess
 if ($photoshop_process) {
     $photoshop_path = $photoshop_process.Path
 
-    # Clear-Host
     Write-Error "Photoshop is currently running. Please close it before proceeding."
     Write-Info "Photoshop PID: $($photoshop_process.Id). Process name: $($photoshop_process.ProcessName)"
 
-    $user_input = Read-Host "Do you want to close Photoshop (Unsaved data probably will be discarded)? (y/N)"
+    $kill_photoshop = Read-YesNo "Do you want to close Photoshop (Unsaved data probably will be discarded)?"
 
-    if ($user_input -eq "y" -or $user_input -eq "Y") {
+    if ($kill_photoshop) {
         try {
             $photoshop_process | Stop-Process -Force
             Write-Success "Photoshop has been closed. Continuing installation..."
@@ -82,7 +134,7 @@ if ($photoshop_process) {
 }
 
 # If photoshop wasn't running, we can clear the host
-if (-not $photoshop_path) {
+if (-not $photoshop_path -and -not $is_silent) {
     Clear-Host
 }
 
@@ -144,8 +196,8 @@ Write-Info "ScanR's Discord if you need help: https://discord.com/invite/Pdmfmqk
 Write-Host
 
 if ($photoshop_path) {
-    $run_photoshop = Read-Host "Do you want to run Photoshop now? (Y/n)"
-    if ($run_photoshop -eq "y" -or $run_photoshop -eq "Y" -or $run_photoshop -eq "") {
+    $run_photoshop = Read-YesNo "Do you want to run Photoshop now?" $true
+    if ($run_photoshop) {
         Write-Info "Starting Photoshop..."
         Start-Process -FilePath $photoshop_path
         Write-Success "Photoshop started successfully."

@@ -1,14 +1,21 @@
-const fs = require('fs');
-const path = require('path');
-const srcDir = path.resolve(__dirname, 'themes');
-const destDir = path.resolve(__dirname, 'app', 'themes');
-if (fs.existsSync(srcDir)) {
-  fs.mkdirSync(destDir, { recursive: true });
-  for (const file of fs.readdirSync(srcDir)) {
-    const src = path.join(srcDir, file);
-    const dest = path.join(destDir, file);
-    if (fs.lstatSync(src).isFile()) {
-      fs.copyFileSync(src, dest);
-    }
-  }
+import { copyFileSync, existsSync, lstatSync, mkdirSync, readdirSync } from 'node:fs'
+import { join, resolve } from 'node:path'
+
+const srcDir = resolve(__dirname, 'themes')
+const destDir = resolve(__dirname, 'app', 'themes')
+
+if (!existsSync(srcDir)) {
+	console.error(`Source directory (${srcDir}) doesn't exist.`)
+	process.exit(1)
+}
+
+mkdirSync(destDir, { recursive: true })
+
+for (const file of readdirSync(srcDir)) {
+	const src = join(srcDir, file)
+	const dest = join(destDir, file)
+
+	if (lstatSync(src).isFile()) {
+		copyFileSync(src, dest)
+	}
 }

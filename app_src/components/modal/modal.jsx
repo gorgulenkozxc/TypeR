@@ -1,41 +1,51 @@
-import './modal.scss';
+import React from 'react'
 
-import React from 'react';
-import {useContext} from '../../context';
-import HelpModal from './help';
-import SettingsModal from './settings';
-import EditStyleModal from './editStyle';
-import EditFolderModal from './editFolder';
-import ExportModal from './export';
-import UpdateModal from './update';
+import './modal.scss'
 
+import { useContext } from '../../context'
+import EditFolderModal from './editFolder'
+import EditStyleModal from './editStyle'
+import ExportModal from './export'
+import HelpModal from './help'
+import SettingsModal from './settings'
+import UpdateModal from './update'
 
 const Modal = React.memo(function Modal() {
-    const context = useContext();
+	const context = useContext()
 
-    let modalContent = null;
-    let modalType = context.state.modalType;
-    if (modalType === 'help') modalContent = <HelpModal />;
-    else if (modalType === 'settings') modalContent = <SettingsModal />;
-    else if (modalType === 'editStyle') modalContent = <EditStyleModal />;
-    else if (modalType === 'editFolder') modalContent = <EditFolderModal />;
-    else if (modalType === 'export') modalContent = <ExportModal />;
-    else if (modalType === 'update') modalContent = <UpdateModal />;
+	let modalContent = null
+	const modalType = context.state.modalType
+	if (modalType === 'help') {
+		modalContent = <HelpModal />
+	}
+	if (modalType === 'settings') {
+		modalContent = <SettingsModal />
+	}
+	if (modalType === 'editStyle') {
+		modalContent = <EditStyleModal />
+	}
+	if (modalType === 'editFolder') {
+		modalContent = <EditFolderModal />
+	}
+	if (modalType === 'export') {
+		modalContent = <ExportModal />
+	}
+	if (modalType === 'update') {
+		modalContent = <UpdateModal />
+	}
 
-    React.useEffect(() => {
-        if (!context.state.notFirstTime) {
-            context.dispatch({type: 'removeFirstTime'});
-        }
-    }, []);
+	React.useEffect(() => {
+		if (!context.state.notFirstTime) {
+			context.dispatch({ type: 'removeFirstTime' })
+		}
+	}, [context.dispatch, context.state.notFirstTime])
 
-    return modalContent ? (
-        <div className="app-modal">
-            <div className="app-modal-hatch hostBgd"></div>
-            <div className="app-modal-inner hostBgdLight">
-                {modalContent}
-            </div>
-        </div>
-    ) : null;
-});
+	return modalContent ? (
+		<div className='app-modal'>
+			<div className='app-modal-hatch hostBgd' />
+			<div className='app-modal-inner hostBgdLight'>{modalContent}</div>
+		</div>
+	) : null
+})
 
-export default Modal;
+export default Modal

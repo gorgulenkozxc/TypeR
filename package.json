@@ -60,5 +60,9 @@
   },
   "devDependencies": {
     "sass": "^1.89.0"
-  }
+  },
+  "trustedDependencies": [
+    "@parcel/watcher",
+    "core-js"
+  ]
 }

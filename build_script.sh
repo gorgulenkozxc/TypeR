@@ -8,10 +8,11 @@ else
     ExtensionVersion="unknown"
 fi
 
-Timestamp=$(date +"%Y%m%d%H%M%S")
+Timestamp=$(date +"%d.%m.%Y_%H%M%S")
 TempDir="$(mktemp -d)/typertools_$Timestamp"
 
-ArtifactPath="dist/typertools-$ExtensionVersion.zip"
+ArtifactPath="dist/typertools_$ExtensionVersion.zip"
+mkdir -p "$(dirname "$ArtifactPath")"
 
 if [ -f "$ArtifactPath" ]; then
     echo -e "Removing old artifact: $ArtifactPath"
@@ -35,10 +36,11 @@ cp -rf ./locale/* "$TempDir/locale/"
 cp -rf ./themes/* "$TempDir/app/themes/"
 
 # Create zip file
-(cd "$(dirname "$TempDir")" && zip -r "$(pwd)/typertools_$Timestamp.zip" "typertools_$Timestamp")
-mv "$(dirname "$TempDir")/typertools_$Timestamp.zip" "./$ArtifactPath"
+(cd "$(dirname "$TempDir")" && zip -r "typertools_$Timestamp.zip" "$TempDir")
+mv "typertools_$Timestamp.zip" "./$ArtifactPath"
 
 # Clean up
 rm -rf "$TempDir"
+rm "typertools_$Timestamp.zip"
 
 echo -e "Created $ArtifactPath successfully."

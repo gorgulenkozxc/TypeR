@@ -28,23 +28,38 @@ jobs:
     - name: Build project
       run: npm run build
 
+      
+    - name: Get version from manifest
+      id: version
+      run: |
+        VERSION=$(grep -oP '<Extension Id="typer".*?Version="\K[^"]+' CSXS/manifest.xml || echo "unknown")
+
+        if [ "$VERSION" = "unknown" ]; then
+          echo "error: version not found in manifest"
+          exit 1
+        fi
+
+        echo "$VERSION" >> $GITHUB_OUTPUT
+      
     - name: Create ZIP artifact
       run: |
         chmod +x ./build_script.sh
         ./build_script.sh
 
-    - name: Get version from manifest
-      id: version
+    - name: Check if ZIP exists
       run: |
-        VERSION=$(grep -oP '<Extension Id="typer".*?Version="\K[^"]+' CSXS/manifest.xml || echo "unknown")
-        echo "version=$VERSION" >> $GITHUB_OUTPUT
+          if [ ! -f "dist/typertools-${{ steps.version.outputs.version }}.zip" ]; then
+            echo "error: zip file wasn't found"
+            ls dist/ 
+            exit 1
+          fi
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: v${{ steps.version.outputs.version }}-$(date +'%Y%m%d%H%M%S')
-        name: TyperTools v${{ steps.version.outputs.version }} ($(date +'%Y-%m-%d'))
-        body: Automatic release created on $(date +'%Y-%m-%d %H:%M:%S')
+        tag_name: v${{ steps.version.outputs.version }}
+        name: TyperTools v${{ steps.version.outputs.version }}
+        body: Automatic release 
         files: dist/typertools-${{ steps.version.outputs.version }}.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

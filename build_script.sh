@@ -9,7 +9,7 @@ fi
 Timestamp=$(date +"%d.%m.%Y_%H%M%S")
 TempDir="$(mktemp -d)/typertools_$Timestamp"
 
-ArtifactPath="dist/typertools_$ExtensionVersion.zip"
+ArtifactPath="typertools_$ExtensionVersion.zip"
 mkdir -p "$(dirname "$ArtifactPath")"
 
 if [ -f "$ArtifactPath" ]; then
@@ -33,12 +33,7 @@ cp -rf ./icons/* "$TempDir/icons/"
 cp -rf ./locale/* "$TempDir/locale/"
 cp -rf ./themes/* "$TempDir/app/themes/"
 
-# Create zip file
-zip -r "typertools_$Timestamp.zip" "$TempDir"
-mv "typertools_$Timestamp.zip" "./$ArtifactPath"
-
-# Clean up
+zip -r "$ArtifactPath" "$TempDir"
 rm -rf "$TempDir"
-rm "typertools_$Timestamp.zip"
 
 echo -e "Created $ArtifactPath successfully."

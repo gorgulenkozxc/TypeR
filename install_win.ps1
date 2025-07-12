@@ -8,20 +8,20 @@ if ($args -contains "--help") {
     exit
 }
 
-$is_mute = $args -contains "--mute"
-$is_silent = $args -contains "--silent" -or $is_mute
-$always_yes = $args -contains "--yes"
+$IsMute = $args -contains "--mute"
+$IsSilent = $args -contains "--silent" -or $IsMute
+$AlwaysYes = $args -contains "--yes"
 
-$execution_start_time = Get-Date
+$ExecutionStartTime = Get-Date
 
 # Get the current extension version
-$manifestContent = Get-Content "CSXS\manifest.xml" -Raw
-$versionMatch = [regex]::Match($manifestContent, '<Extension Id="typer".*?Version="([^"]+)"')
-if ($versionMatch.Success) {
-    $EXT_VERSION = $versionMatch.Groups[1].Value
+$ManifestContent = Get-Content "CSXS\manifest.xml" -Raw
+$VersionMatch = [regex]::Match($ManifestContent, '<Extension Id="typer".*?Version="([^"]+)"')
+if ($VersionMatch.Success) {
+    $ExtensionVersion = $VersionMatch.Groups[1].Value
 }
 else {
-    $EXT_VERSION = "unknown"
+    $ExtensionVersion = "unknown"
 }
 
 function Get-PhotoshopProcess {
@@ -35,85 +35,85 @@ function Get-PhotoshopProcess {
 
 function Write-Error {
     param (
-        [string]$message
+        [string]$Message
     )
 
-    if ($is_mute) {
+    if ($IsMute) {
         return
     }
 
-    Write-Host "[-] $message" -ForegroundColor Red
+    Write-Host "[-] $Message" -ForegroundColor Red
 }
 
 function Write-Warning {
     param (
-        [string]$message
+        [string]$Message
     )
 
-    if ($is_silent) {
+    if ($IsSilent) {
         return
     }
 
-    Write-Host "[!] $message" -ForegroundColor Yellow
+    Write-Host "[!] $Message" -ForegroundColor Yellow
 }
 
 function Write-Info {
     param (
-        [string]$message
+        [string]$Message
     )
 
-    if ($is_silent) {
+    if ($IsSilent) {
         return
     }
 
-    Write-Host "[*] $message" -ForegroundColor DarkGray
+    Write-Host "[*] $Message" -ForegroundColor DarkGray
 }
 
 function Write-Success {
     param (
-        [string]$message
+        [string]$Message
     )
 
-    if ($is_silent) {
+    if ($IsSilent) {
         return
     }
 
-    Write-Host "[+] $message" -ForegroundColor Green
+    Write-Host "[+] $Message" -ForegroundColor Green
 }
 
 function Read-YesNo {
     param (
-        [string]$message,
+        [string]$Message,
         [switch]$defaultYes
     )
 
-    if ($always_yes) {
+    if ($AlwaysYes) {
         return $true
     }
 
-    $user_input = Read-Host "$message $(if ($defaultYes) { "(Y/n)" } else { "(y/N)" })"
+    $UserInput = Read-Host "$Message $(if ($defaultYes) { "(Y/n)" } else { "(y/N)" })"
 
-    if ($user_input -eq "") {
+    if ($UserInput -eq "") {
         return $defaultYes
     }
 
-    return $user_input -eq "y" -or $user_input -eq "Y"
+    return $UserInput -eq "y" -or $UserInput -eq "Y"
 }
 
-$photoshop_path = $null
-$photoshop_process = Get-PhotoshopProcess
+$PhotoshopExecutablePath = $null
+$PhotoshopProcess = Get-PhotoshopProcess
 # Wait for Photoshop to get closed if it's running
-if ($photoshop_process) {
-    $photoshop_path = $photoshop_process.Path
+if ($PhotoshopProcess) {
+    $PhotoshopExecutablePath = $PhotoshopProcess.Path
 
     Write-Error "Photoshop is currently running. Please close it before proceeding."
-    Write-Info "Photoshop PID: $($photoshop_process.Id). Process name: $($photoshop_process.ProcessName)"
+    Write-Info "Photoshop PID: $($PhotoshopProcess.Id). Process name: $($PhotoshopProcess.ProcessName)"
 
-    $kill_photoshop = Read-YesNo "Do you want to close Photoshop (Unsaved data probably will be discarded)?"
+    $KillPhotoshop = Read-YesNo "Do you want to close Photoshop (Unsaved data probably will be discarded)?"
 
-    if ($kill_photoshop) {
+    if ($KillPhotoshop) {
         try {
-            $photoshop_process | Stop-Process -Force
+            $PhotoshopProcess | Stop-Process -Force
             Write-Success "Photoshop has been closed. Continuing installation..."
         }
         catch {
@@ -134,18 +134,18 @@ if ($photoshop_process) {
 }
 
 # If photoshop wasn't running, we can clear the host
-if (-not $photoshop_path -and -not $is_silent) {
+if (-not $PhotoshopExecutablePath -and -not $IsSilent) {
     Clear-Host
 }
 
-Write-Warning "Installing Photoshop extension «TypeR v$EXT_VERSION»..."
+Write-Warning "Installing Photoshop extension «TypeR v$ExtensionVersion»..."
 
 Write-Info "Enabling PlayerDebugMode for CSXS versions 6-12..."
 # Enable PlayerDebugMode for CSXS versions 6-12
 6..12 | ForEach-Object {
-    $keyPath = "HKCU:\SOFTWARE\Adobe\CSXS.$_"
-    if (Test-Path $keyPath) {
-        Set-ItemProperty -Path $keyPath -Name "PlayerDebugMode" -Value "1" -Force
+    $KeyPath = "HKCU:\SOFTWARE\Adobe\CSXS.$_"
+    if (Test-Path $KeyPath) {
+        Set-ItemProperty -Path $KeyPath -Name "PlayerDebugMode" -Value "1" -Force
     }
 }
 
@@ -183,23 +183,22 @@ if (Test-Path "__storage") {
     Remove-Item "__storage" -Force
 }
 
-$execution_end_time = Get-Date
-$execution_duration = $execution_end_time - $execution_start_time
+$ExecutionDuration = Get-Date - $ExecutionStartTime
 
 Write-Host
 Write-Success "Installation completed."
 Write-Warning "Open Photoshop and in the upper menu click the following: [Window] > [Extensions] > [TypeR]"
-Write-Info ("Installed in {0:N2} seconds" -f $execution_duration.TotalSeconds)
+Write-Info ("Installed in {0:N2} seconds" -f $ExecutionDuration.TotalSeconds)
 Write-Host
 Write-Info "Many thanks to Swirt for TyperTools and SeanR & Sakushi for this fork."
 Write-Info "ScanR's Discord if you need help: https://discord.com/invite/Pdmfmqk"
 Write-Host
 
-if ($photoshop_path) {
-    $run_photoshop = Read-YesNo "Do you want to run Photoshop now?" $true
-    if ($run_photoshop) {
+if ($PhotoshopExecutablePath) {
+    $RunPhotoshop = Read-YesNo "Do you want to run Photoshop now?" $true
+    if ($RunPhotoshop) {
         Write-Info "Starting Photoshop..."
-        Start-Process -FilePath $photoshop_path
+        Start-Process -FilePath $PhotoshopExecutablePath
         Write-Success "Photoshop started successfully."
     }
     else {

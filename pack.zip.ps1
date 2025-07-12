@@ -1,30 +1,42 @@
-$version = Read-Host -Prompt 'Version'
-$name = "typertools-$version"
-
-if (Test-Path .\\$name.zip) {
-    Remove-Item .\\$name.zip -force
+# Get the current extension version
+$ManifestContent = Get-Content "CSXS\manifest.xml" -Raw
+$VersionMatch = [regex]::Match($ManifestContent, '<Extension Id="typer".*?Version="([^"]+)"')
+if ($VersionMatch.Success) {
+    $ExtensionVersion = $VersionMatch.Groups[1].Value
 }
-if (Test-Path .\\$name) {
-    Remove-Item .\\$name -force -recurse
+else {
+    $ExtensionVersion = "unknown"
 }
 
-New-Item -Type Dir .\\$name
-New-Item -Type Dir .\\$name\\app
-New-Item -Type Dir .\\$name\\CSXS
-New-Item -Type Dir .\\$name\\icons
-New-Item -Type Dir .\\$name\\locale
-New-Item -Type Dir .\\$name\\app\\themes
+$Timestamp = Get-Date -Format "yyyyMMddHHmmss"
+$TempDir = Join-Path -Path $([System.IO.Path]::GetTempPath()) -ChildPath "typertools_$Timestamp"
 
-Copy-Item .\\install_win.cmd .\\$name -force
-Copy-Item .\\install_mac.sh .\\$name -force
-Copy-item .\\app\\* .\\$name\\app -force -recurse
-Copy-item .\\CSXS\\* .\\$name\\CSXS -force -recurse
-Copy-item .\\icons\\* .\\$name\\icons -force -recurse
-Copy-item .\\locale\\* .\\$name\\locale -force -recurse
-Copy-item .\\themes\\* .\\$name\\app\\themes -force -recurse
+$ArtifactPath = "dist/typertools-$ExtensionVersion.zip"
 
-Compress-Archive .\\$name .\\$name.zip
+If (Test-Path $ArtifactPath) {
+    Write-Host "Removing old artifact: $ArtifactPath" -ForegroundColor Yellow
+    Remove-Item $ArtifactPath -Force
+}
 
-Remove-Item .\\$name -force -recurse
+Write-Host "Creating temporary directory: $TempDir" -ForegroundColor DarkGray
 
-cmd /c pause
+New-Item -Type Directory -Path $TempDir | Out-Null
+New-Item -Type Dir $TempDir\\app | Out-Null
+New-Item -Type Dir $TempDir\\CSXS | Out-Null
+New-Item -Type Dir $TempDir\\icons | Out-Null
+New-Item -Type Dir $TempDir\\locale | Out-Null
+New-Item -Type Dir $TempDir\\app\\themes | Out-Null
+
+Copy-Item .\\install_win.cmd $TempDir -force
+Copy-Item .\\install_mac.sh $TempDir -force
+Copy-Item .\\install_win.ps1 $TempDir -force
+Copy-item .\\app\\* $TempDir\\app -force -recurse
+Copy-item .\\CSXS\\* $TempDir\\CSXS -force -recurse
+Copy-item .\\icons\\* $TempDir\\icons -force -recurse
+Copy-item .\\locale\\* $TempDir\\locale -force -recurse
+Copy-item .\\themes\\* $TempDir\\app\\themes -force -recurse
+
+Compress-Archive -Path "$TempDir\*" -DestinationPath ".\$ArtifactPath"
+Remove-Item $TempDir -force -recurse
+
+Write-Host "Created $ArtifactPath successfully." -ForegroundColor Green

@@ -4,7 +4,7 @@ const config = {
 	appUrl: 'https://typer.hayasaku.fr/',
 	exportFileName: 'TypeR_Export',
 	defaultPrefixColor: '#FFF3B0',
-	appVersion: '2.2.0',
+	appVersion: '2.2.1',
 	checkUpdates: true,
 	appTitle: 'TypeR',
 	themes: {

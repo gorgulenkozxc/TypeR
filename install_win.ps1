@@ -184,7 +184,7 @@ if (Test-Path "__storage") {
     Remove-Item "__storage" -Force
 }
 
-$ExecutionDuration = Get-Date - $ExecutionStartTime
+$ExecutionDuration = (Get-Date) - $ExecutionStartTime
 
 Write-Host
 Write-Success "Installation completed."

@@ -197,8 +197,8 @@ const PreviewBlock = React.memo(function PreviewBlock() {
 					<div
 						className='preview-line-text'
 						style={{
+							fontFamily: 'Tahoma',
 							...styleObject,
-							fontFamily: styleObject.fontFamily || 'Tahoma',
 						}}
 					>
 						{line.text || ''}

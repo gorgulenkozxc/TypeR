@@ -503,25 +503,25 @@ function _createTextLayerInSelection() {
 		createTextLayerInSelectionResult = 'doc'
 		return
 	}
-	var selection = _checkSelection()
+
+	const selection = _checkSelection()
 	if (selection.error) {
 		createTextLayerInSelectionResult = selection.error
 		return
 	}
-	var width = selection.width
-	var height = selection.height * 15
-	_createAndSetLayerText(createTextLayerInSelectionData, width, height)
-	var bounds = _getCurrentTextLayerBounds()
+
+	_createAndSetLayerText(createTextLayerInSelectionData, selection.width, selection.height)
+
+	const bounds = _getCurrentTextLayerBounds()
+
 	if (createTextLayerInSelectionPoint) {
 		_changeToPointText()
 	} else {
-		var textParams = jamText.getLayerText()
-		var textSize = textParams.layerText.textStyleRange[0].textStyle.size
-		_setTextBoxSize(width, bounds.height + textSize + 2)
+		_setTextBoxSize(selection.width, selection.height)
 	}
-	var offsetX = selection.xMid - bounds.xMid
-	var offsetY = selection.yMid - bounds.yMid
-	_moveLayer(offsetX, offsetY)
+
+	_moveLayer(selection.xMid - bounds.xMid, selection.top)
+
 	createTextLayerInSelectionResult = ''
 }
 

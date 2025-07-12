@@ -84,17 +84,18 @@ function Write-Success {
 function Read-YesNo {
     param (
         [string]$Message,
-        [switch]$defaultYes
+        [bool]$DefaultYes
     )
 
     if ($AlwaysYes) {
         return $true
     }
 
-    $UserInput = Read-Host "$Message $(if ($defaultYes) { "(Y/n)" } else { "(y/N)" })"
+    $VariantsHint = If ($DefaultYes) { "(Y/n)" } else { "(y/N)" }
+    $UserInput = Read-Host "$Message $VariantsHint"
 
     if ($UserInput -eq "") {
-        return $defaultYes
+        return $DefaultYes
     }
 
     return $UserInput -eq "y" -or $UserInput -eq "Y"

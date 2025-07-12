@@ -197,6 +197,7 @@ function createTextLayerInSelection(text, _style, pointText, callback = () => {}
 	const style = _style || { textProps: getDefaultStyle(), stroke: getDefaultStroke() }
 
 	const data = JSON.stringify({ text, style })
+
 	csInterface.evalScript(`createTextLayerInSelection(${data}, ${!!pointText})`, (error) => {
 		if (error === 'smallSelection') {
 			nativeAlert(locale.errorSmallSelection, locale.errorTitle, true)

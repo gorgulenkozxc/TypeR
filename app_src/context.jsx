@@ -244,6 +244,7 @@ function reducer(state, action) {
 			newState.folders = state.folders.filter((f) => f.id !== action.id)
 			break
 		}
+
 		case 'duplicateFolder': {
 			const folderToDup = action.data
 			const newFolderId = Math.random().toString(36).substr(2, 8)

@@ -1,10 +1,8 @@
 #!/bin/bash
 
 # Get the current extension version
-ManifestContent=$(cat "CSXS/manifest.xml")
-if [[ $ManifestContent =~ \<Extension\ Id=\"typer\".*?Version=\"([^\"]+)\" ]]; then
-    ExtensionVersion="${BASH_REMATCH[1]}"
-else
+ExtensionVersion=$(grep -oP '<Extension Id="typer"[^>]*Version="\K[^"]+' CSXS/manifest.xml | head -n1)
+if [ -z "$ExtensionVersion" ]; then
     ExtensionVersion="unknown"
 fi
 
@@ -36,7 +34,7 @@ cp -rf ./locale/* "$TempDir/locale/"
 cp -rf ./themes/* "$TempDir/app/themes/"
 
 # Create zip file
-(cd "$(dirname "$TempDir")" && zip -r "typertools_$Timestamp.zip" "$TempDir")
+zip -r "typertools_$Timestamp.zip" "$TempDir"
 mv "typertools_$Timestamp.zip" "./$ArtifactPath"
 
 # Clean up

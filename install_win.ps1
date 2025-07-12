@@ -192,7 +192,6 @@ Write-Warning "Open Photoshop and in the upper menu click the following: [Window
 Write-Info ("Installed in {0:N2} seconds" -f $ExecutionDuration.TotalSeconds)
 Write-Host
 Write-Info "Many thanks to Swirt for TyperTools and SeanR & Sakushi for this fork."
-Write-Info "ScanR's Discord if you need help: https://discord.com/invite/Pdmfmqk"
 Write-Host
 
 if ($PhotoshopExecutablePath) {

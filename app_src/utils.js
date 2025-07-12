@@ -7,11 +7,40 @@ const STORAGE_PATH = `${SYSTEM_PATH}/storage`
 let locale = {}
 initLocale()
 
-async function checkUpdate(currentVersion) {
+class Version {
+	constructor(rawVersion) {
+		if (typeof rawVersion === 'string') {
+			const parts = [...rawVersion.matchAll(/\d+/g)]
+
+			this.major = Number.parseInt(parts[0], 10)
+			this.minor = Number.parseInt(parts[1], 10)
+			this.patch = parts.length > 2 ? Number.parseInt(parts[2], 10) : 0
+		} else if (rawVersion instanceof Version) {
+			this.major = rawVersion.major
+			this.minor = rawVersion.minor
+			this.patch = rawVersion.patch
+		} else {
+			this.major = 0
+			this.minor = 0
+			this.patch = 0
+		}
+	}
+
+	equals(version) {
+		return (
+			this.major === version.major && this.minor === version.minor && this.patch === version.patch
+		)
+	}
+}
+
+async function checkUpdate(currentVersionStr) {
 	try {
-		const response = await fetch('https://api.github.com/repos/ScanR/TypeR/releases/latest', {
-			headers: { Accept: 'application/vnd.github.v3.html+json' },
-		})
+		const response = await fetch(
+			'https://api.github.com/repos/gorgulenkozxc/TypeR/releases/latest',
+			{
+				headers: { Accept: 'application/vnd.github.v3.html+json' },
+			}
+		)
 
 		if (!response.ok) {
 			return null
@@ -19,7 +48,10 @@ async function checkUpdate(currentVersion) {
 
 		const data = await response.json()
 
-		if (data.tag_name && data.tag_name !== currentVersion) {
+		const newestVersion = new Version(data.tag_name)
+		const currentVersion = new Version(currentVersionStr)
+
+		if (data.tag_name && !currentVersion.equals(newestVersion)) {
 			return { version: data.tag_name, body: data.body_html || data.body }
 		}
 	} catch (e) {

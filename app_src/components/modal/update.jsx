@@ -7,13 +7,16 @@ import { locale, openUrl } from '../../utils'
 const UpdateModal = React.memo(function UpdateModal() {
 	const context = useContext()
 	const { version, body } = context.state.modalData
-	const close = () => {
+
+	function close() {
 		context.dispatch({ type: 'setModal' })
 	}
-	const download = () => {
-		openUrl('https://github.com/ScanR/TypeR/releases/latest')
+
+	function download() {
+		openUrl('https://github.com/gorgulenkozxc/TypeR/releases/latest')
 		close()
 	}
+
 	return (
 		<React.Fragment>
 			<div className='app-modal-header hostBrdBotContrast'>
@@ -27,6 +30,7 @@ const UpdateModal = React.memo(function UpdateModal() {
 					<FiX size={18} />
 				</button>
 			</div>
+
 			<div className='app-modal-body'>
 				<div className='app-modal-body-inner article-format'>
 					<p>{locale.updateText.replace('{version}', version)}</p>
@@ -37,6 +41,7 @@ const UpdateModal = React.memo(function UpdateModal() {
 					)}
 				</div>
 			</div>
+
 			<div className='app-modal-footer hostBrdTopContrast'>
 				<button type='button' className='topcoat-button--large' onClick={download}>
 					{locale.updateDownload}

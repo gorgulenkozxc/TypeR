@@ -6,20 +6,16 @@ TypeR is a better version of TyperTools, a Photoshop extension designed for type
 
 - **Bug Fixes**: Multiple bugs from the original TyperTools have been fixed.
 - Added **stroke (outline)** support to styles.
-- **Stable Auto-Centering**: Text shape no longer changes when using auto-centering.
-- **Auto-centering** now works without manual selection by automatically detecting the bubble shape (like in Typesetterer).
-- **Customizable Shortcuts**: You can now modify keyboard shortcuts. (+ added some new keyboard shortcuts)  
-- **Automatic Page Detection**: Automatically detects pages when importing.  
-- **Automatic Page Switching**: Automatically switches pages for seamless workflow.  
-- **Resize TypeR**: Decreased size limit of the TypeR window so it can be much smaller.  
-- **Line Spacing Sync**: When increasing/decreasing text size with TypeR, line spacing adjusts accordingly.  
-- **Adaptive Size**: If no fixed text size is defined, the size of the selected layer will be used.  
-- **Line Break on Insert**: A line break is now automatically added when inserting text on the current layer.  
-- **Duplicate Style Folders**: You can now duplicate a style folder easily.  
+- **Customizable Shortcuts**: You can now modify keyboard shortcuts. (+ added some new keyboard shortcuts)
+- **Automatic Page Detection**: Automatically detects pages when importing.
+- **Automatic Page Switching**: Automatically switches pages for seamless workflow.
+- **Resize TypeR**: Decreased size limit of the TypeR window so it can be much smaller.
+- **Line Spacing Sync**: When increasing/decreasing text size with TypeR, line spacing adjusts accordingly.
+- **Adaptive Size**: If no fixed text size is defined, the size of the selected layer will be used.
+- **Line Break on Insert**: A line break is now automatically added when inserting text on the current layer.
+- **Duplicate Style Folders**: You can now duplicate a style folder easily.
 - **Export a Single Folder**: No need to export all parameters and font styles, just export/import one (or more) folder as needed to share it your team members.
 - **Tag priority**: Style with the same prefix matching is now prioritized based on the currently selected folder.
-
-
 
 ## Requirements
 
@@ -28,7 +24,9 @@ TypeR is a better version of TyperTools, a Photoshop extension designed for type
   (There may be problems with some portable or lightweight builds)
 
 ## Installation Guide
+
 # If you download from the source code :
+
 ### Prerequisites
 
 - Ensure you have Node.js installed on your system. You can download it from [Node.js official website](https://nodejs.org/).
@@ -38,7 +36,7 @@ TypeR is a better version of TyperTools, a Photoshop extension designed for type
 1. Clone the repository and navigate to the root directory in your terminal.
 
    ```sh
-   git clone https://github.com/ScanR/TypeR.git
+   git clone https://github.com/gorgulenkozxc/TypeR.git
    cd TypeR
    ```
 
@@ -48,8 +46,7 @@ TypeR is a better version of TyperTools, a Photoshop extension designed for type
    npm install
    ```
 
-3. Build the project using npm. 
-
+3. Build the project using npm.
 
    ```sh
    npm run build
@@ -58,32 +55,38 @@ TypeR is a better version of TyperTools, a Photoshop extension designed for type
 4. Execute the installation script for your operating system.
 
    For macOS:
+
    ```sh
    chmod +x install_mac.sh
    ./install_mac.sh
    ```
 
    For Windows:
+
    ```sh
-   install_win.cmd
+   install_win.ps1
    ```
 
 # If you download from the release :
+
 1. Extract the archive and execute the installation script for your operating system.
 
    For macOS:
+
    ```sh
    chmod +x install_mac.sh
    ./install_mac.sh
    ```
 
    For Windows:
+
    ```sh
-   install_win.cmd
+   install_win.ps1
    ```
+
 ## Usage
 
-After installation, you can access TypeR within Adobe Photoshop Extensions tab. 
+After installation, you can access TypeR within Adobe Photoshop Extensions tab.
 
 ## Contributing
 

@@ -341,7 +341,6 @@ function _checkSelection() {
 	if (selection === undefined) {
 		return { error: 'noSelection' }
 	}
-	_modifySelectionBounds(-10)
 	selection = _getCurrentSelectionBounds()
 	if (selection === undefined || selection.width * selection.height < 200) {
 		return { error: 'smallSelection' }
@@ -509,7 +508,7 @@ function _createTextLayerInSelection() {
 		createTextLayerInSelectionResult = selection.error
 		return
 	}
-	var width = selection.width * 0.9
+	var width = selection.width
 	var height = selection.height * 15
 	_createAndSetLayerText(createTextLayerInSelectionData, width, height)
 	var bounds = _getCurrentTextLayerBounds()

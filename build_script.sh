@@ -33,7 +33,9 @@ cp -rf ./icons/* "$TempDir/icons/"
 cp -rf ./locale/* "$TempDir/locale/"
 cp -rf ./themes/* "$TempDir/app/themes/"
 
-zip -r "$ArtifactPath" "$TempDir"
+CurrentDir=$(pwd)
+(cd "$TempDir" && zip -r "$CurrentDir/$ArtifactPath" .)
+cd "$CurrentDir" || exit 1
 rm -rf "$TempDir"
 
 echo -e "Created $ArtifactPath successfully."

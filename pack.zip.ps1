@@ -27,7 +27,6 @@ New-Item -Type Dir $TempDir\\icons | Out-Null
 New-Item -Type Dir $TempDir\\locale | Out-Null
 New-Item -Type Dir $TempDir\\app\\themes | Out-Null
 
-Copy-Item .\\install_win.cmd $TempDir -force
 Copy-Item .\\install_mac.sh $TempDir -force
 Copy-Item .\\install_win.ps1 $TempDir -force
 Copy-item .\\app\\* $TempDir\\app -force -recurse
